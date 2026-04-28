@@ -5,6 +5,8 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { Head, Link, useForm } from '@inertiajs/react';
+import GoogleButton from '@/Components/GoogleButton';
+
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -100,6 +102,21 @@ export default function Login({ status, canResetPassword }) {
                     <PrimaryButton className="w-full" disabled={processing}>
                         Sign In
                     </PrimaryButton>
+                </div>
+
+                <div className="relative py-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-brand-100/50"></div>
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-white px-4 text-brand-400 font-bold tracking-widest">
+                            Or continue with
+                        </span>
+                    </div>
+                </div>
+
+                <div>
+                    <GoogleButton />
                 </div>
 
                 <div className="text-center pt-4 border-t border-brand-100/50">
