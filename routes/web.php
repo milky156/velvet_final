@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Public routes
-Route::get('/', fn() => Inertia::render('Landing'))->name('landing');
+Route::get('/', fn() => Inertia::render('Landing'))->name('landing')->middleware('role_redirect');
 Route::get('/cart', [CartController::class, 'index'])->name('cart');
 
 // API Routes for Chat Smart Search
@@ -32,7 +32,7 @@ Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout')
 // Orders (auth optional – guests see empty list)
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role_redirect'])->group(function () {
     Route::get('/home', [PageController::class, 'index'])->name('home');
 
     // Admin routes – protected by admin role middleware
@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Orders
         Route::get('/orders', [AdminController::class, 'ordersIndex'])->name('orders.index');
         Route::patch('/orders/{order}/status', [AdminController::class, 'updateStatus'])->name('orders.status');
+        Route::post('/orders/{order}/confirm', [AdminController::class, 'confirmOrder'])->name('orders.confirm');
 
         // Products
         Route::get('/products', [AdminController::class, 'productsIndex'])->name('products.index');
@@ -60,18 +61,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/users', [AdminController::class, 'usersIndex'])->name('users.index');
         Route::patch('/users/{user}/role', [AdminController::class, 'updateUserRole'])->name('users.role');
         Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
-
-        // Delivery Zones
-        Route::get('/delivery', [AdminController::class, 'deliveryIndex'])->name('delivery.index');
-        Route::post('/delivery', [AdminController::class, 'storeDelivery'])->name('delivery.store');
-        Route::put('/delivery/{zone}', [AdminController::class, 'updateDelivery'])->name('delivery.update');
-        Route::delete('/delivery/{zone}', [AdminController::class, 'destroyDelivery'])->name('delivery.destroy');
     });
 
     // Rider routes
-    Route::prefix('rider')->name('rider.')->group(function () {
-        Route::get('/', [RiderController::class, 'index'])->name('index');
-        Route::patch('/orders/{order}/status', [RiderController::class, 'updateStatus'])->name('orders.status');
+    Route::prefix('rider')->name('rider.')->middleware('rider')->group(function () {
+        Route::get('/dashboard', [RiderController::class, 'index'])->name('index');
+        Route::patch('/orders/{order}/pickup', [RiderController::class, 'pickup'])->name('orders.pickup');
+        Route::patch('/orders/{order}/dropoff', [RiderController::class, 'dropoff'])->name('orders.dropoff');
     });
 });
 
@@ -79,6 +75,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Messages
+    Route::get('/messages', [\App\Http\Controllers\MessageController::class, 'index'])->name('messages.index');
+    Route::get('/api/messages/{contactId}', [\App\Http\Controllers\MessageController::class, 'fetchMessages']);
+    Route::get('/api/unread-messages-count', [\App\Http\Controllers\MessageController::class, 'unreadCount']);
+    Route::get('/api/pending-orders-count', [OrderController::class, 'pendingCount']);
+    Route::post('/api/messages', [\App\Http\Controllers\MessageController::class, 'store']);
 });
 
 require __DIR__.'/auth.php';

@@ -6,8 +6,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureUserIsAdmin
+class EnsureUserIsRider
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
@@ -16,15 +21,10 @@ class EnsureUserIsAdmin
             return redirect()->route('login');
         }
 
-        if ($user->role === 'admin') {
+        if ($user->role === 'rider' || $user->role === 'admin') {
             return $next($request);
         }
 
-        // If rider tries to access admin, send them to rider dashboard
-        if ($user->role === 'rider') {
-            return redirect()->route('rider.index')->with('error', 'Unauthorized access to Admin Panel.');
-        }
-
-        return redirect('/')->with('error', 'Admin access only.');
+        return redirect('/')->with('error', 'Rider access only.');
     }
 }

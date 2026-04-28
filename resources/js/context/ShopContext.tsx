@@ -1,55 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { usePage, router } from "@inertiajs/react";
 import { products as initialProducts } from "@/lib/data";
-
-type UserRole = "customer" | "admin" | "rider" | null;
-
-type CartItem = {
-  productId: string;
-  quantity: number;
-  note?: string;
-  wrap?: string;
-};
-
-type Product = {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  stock: number;
-  image: string;
-  categories: { id: number; name: string; type: string }[];
-};
-
-type Order = {
-  id: string | number;
-  items: CartItem[];
-  total: number;
-  createdAt: string;
-  created_at?: string;
-  status: string;
-  deliveryAddress?: string;
-  delivery_address?: string;
-  deliveryLat?: number;
-  delivery_lat?: number;
-  deliveryLng?: number;
-  delivery_lng?: number;
-  contactPhone?: string;
-  contact_phone?: string;
-  deliveryOption?: string;
-  delivery_option?: string;
-  paymentMethod?: string;
-  payment_method?: string;
-  mapsUrl?: string;
-  maps_url?: string;
-  customerName?: string;
-  customer_name?: string;
-  customerEmail?: string;
-  customer_email?: string;
-};
-
-type Profile = { name: string; email: string; phone: string; address: string };
-type Message = { id: string; from: "customer" | "admin"; text: string; createdAt: string };
+import { Product, CartItem, Order, Profile, Message, UserRole } from "@/lib/types";
 
 type ShopContextType = {
   products: Product[];
@@ -114,7 +66,7 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
   const [lowStockAlert, setLowStockAlert] = useState<string | null>(null);
 
   // Derive role from auth user passed by Inertia shared data
-  const page = usePage<{ auth?: { user?: { role?: string; name?: string; email?: string } } }>();
+  const page = usePage<{ auth?: { user?: { id: number; name: string; email: string; role: string; email_verified_at?: string } } }>();
   const authUser = page.props?.auth?.user;
   const currentUserRole: UserRole = (authUser?.role as UserRole) ?? null;
   const username = authUser?.name ?? null;
@@ -122,7 +74,7 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
   // Sync profile with authenticated user
   useEffect(() => {
     if (authUser) {
-      setProfile((prev) => ({
+      setProfile((prev: Profile) => ({
         ...prev,
         name: authUser.name ?? prev.name,
         email: authUser.email ?? prev.email,
@@ -135,23 +87,23 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
   useEffect(() => { localStorage.setItem("vv_messages", JSON.stringify(messages)); }, [messages]);
 
   const upsertProduct = useCallback((product: Product) => {
-    setProducts((prev) => {
-      const idx = prev.findIndex((p) => p.id === product.id);
+    setProducts((prev: Product[]) => {
+      const idx = prev.findIndex((p: Product) => p.id === product.id);
       if (idx === -1) return [product, ...prev];
-      return prev.map((p) => (p.id === product.id ? product : p));
+      return prev.map((p: Product) => (p.id === product.id ? product : p));
     });
   }, []);
 
   const addToCart = (productId: string, quantity: number, note?: string, wrap?: string) => {
-    const product = products.find((p) => p.id === productId);
+    const product = products.find((p: Product) => p.id === productId);
     if (!product || product.stock < quantity) {
       setLowStockAlert("Sorry, not enough stock available.");
       return;
     }
-    setCart((prev) => {
-      const existing = prev.find((item) => item.productId === productId);
+    setCart((prev: CartItem[]) => {
+      const existing = prev.find((item: CartItem) => item.productId === productId);
       if (existing) {
-        return prev.map((item) =>
+        return prev.map((item: CartItem) =>
           item.productId === productId
             ? { ...item, quantity: item.quantity + quantity, note, wrap }
             : item,
@@ -162,19 +114,19 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
   };
 
   const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.productId !== productId));
+    setCart((prev: CartItem[]) => prev.filter((item: CartItem) => item.productId !== productId));
   };
 
   const updateProfile = (nextProfile: Profile) => setProfile(nextProfile);
 
   const updateCartQty = (productId: string, quantity: number) => {
     if (quantity <= 0) { removeFromCart(productId); return; }
-    setCart((prev) => prev.map((item) => item.productId === productId ? { ...item, quantity } : item));
+    setCart((prev: CartItem[]) => prev.map((item: CartItem) => item.productId === productId ? { ...item, quantity } : item));
   };
 
   const updateCartItem = (productId: string, data: Partial<{ note: string; wrap: string }>) => {
-    setCart((prev) =>
-      prev.map((item) =>
+    setCart((prev: CartItem[]) =>
+      prev.map((item: CartItem) =>
         item.productId === productId
           ? { ...item, note: data.note !== undefined ? data.note : item.note, wrap: data.wrap !== undefined ? data.wrap : item.wrap }
           : item,
@@ -182,7 +134,6 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
     );
   };
 
-  // POST cart to Laravel CheckoutController
   const placeOrder = (
     deliveryAddress: string,
     contactPhone: string,
@@ -210,7 +161,7 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
           setCart([]);
           setLowStockAlert("Order placed! Redirecting to your orders…");
         },
-        onError: (errors) => {
+        onError: (errors: any) => {
           setLowStockAlert(Object.values(errors).join(" "));
         },
       },
@@ -219,10 +170,10 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
 
   const sendMessage = (text: string, from: "customer" | "admin") => {
     const newMessage: Message = { id: `msg_${Date.now()}`, from, text, createdAt: new Date().toISOString() };
-    setMessages((old) => [...old, newMessage]);
+    setMessages((old: Message[]) => [...old, newMessage]);
     if (from === "customer") {
       setTimeout(() => {
-        setMessages((old) => [
+        setMessages((old: Message[]) => [
           ...old,
           { id: `msg_${Date.now()}_r`, from: "admin", text: "Thanks for reaching out! Our team will get back to you shortly.", createdAt: new Date().toISOString() },
         ]);
@@ -230,19 +181,18 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
     }
   };
 
-  // Quick status advance (still works with DB via router.patch)
   const advanceOrderStatus = (orderId: string | number) => {
-    const order = orders.find((o) => String(o.id) === String(orderId));
+    const order = orders.find((o: Order) => String(o.id) === String(orderId));
     if (!order) return;
     const current = order.status;
     const next = current === "In Arrangement" ? "Out for Delivery" : current === "Out for Delivery" ? "Delivered" : "Delivered";
     router.patch(`/admin/orders/${orderId}/status`, { status: next }, { preserveScroll: true });
-    setOrders((old) => old.map((o) => String(o.id) === String(orderId) ? { ...o, status: next } : o));
+    setOrders((old: Order[]) => old.map((o: Order) => String(o.id) === String(orderId) ? { ...o, status: next } : o));
   };
 
   const setOrderStatus = (orderId: string | number, status: string) => {
     router.patch(`/rider/orders/${orderId}/status`, { status }, { preserveScroll: true });
-    setOrders((old) => old.map((o) => String(o.id) === String(orderId) ? { ...o, status } : o));
+    setOrders((old: Order[]) => old.map((o: Order) => String(o.id) === String(orderId) ? { ...o, status } : o));
   };
 
   const signIn = (name: string, role: UserRole) => {};

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import { useShop } from "@/context/ShopContext";
+import axios from "axios";
 
 export const SiteHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -14,12 +15,26 @@ export const SiteHeader = () => {
   const user = auth?.user;
   const role = user?.role ?? null;
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchUnread = async () => {
+        try {
+            const res = await axios.get('/api/unread-messages-count');
+            setUnreadCount(res.data.count);
+        } catch (e) {}
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 5000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   // Close mobile menu on path change
   useEffect(() => {
@@ -104,6 +119,16 @@ export const SiteHeader = () => {
           </NavLink>
 
           <NavLink href="/orders">Orders</NavLink>
+          {user && (
+            <NavLink href="/messages">
+              Messages
+              {unreadCount > 0 && (
+                <span className="ml-1.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white ring-1 ring-white">
+                    {unreadCount}
+                </span>
+              )}
+            </NavLink>
+          )}
           {user && <NavLink href="/profile">Profile</NavLink>}
           {role === "admin" && <NavLink href="/admin">Admin</NavLink>}
           {role === "rider" && <NavLink href="/rider">Rider</NavLink>}
@@ -183,6 +208,7 @@ export const SiteHeader = () => {
             <nav className="flex flex-col gap-2">
                 <NavLink href="/home" mobile>Store</NavLink>
                 <NavLink href="/orders" mobile>Orders</NavLink>
+                {user && <NavLink href="/messages" mobile>Messages</NavLink>}
                 {user && <NavLink href="/profile" mobile>Profile</NavLink>}
                 {role === "admin" && <NavLink href="/admin" mobile>Admin Dashboard</NavLink>}
                 {role === "rider" && <NavLink href="/rider" mobile>Rider Dashboard</NavLink>}

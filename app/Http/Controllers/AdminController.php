@@ -54,11 +54,20 @@ class AdminController extends Controller
         ]);
     }
 
+    public function confirmOrder(Order $order)
+    {
+        $order->update(['status' => 'In Arrangement']);
+        return back()->with('success', 'Order confirmed and moved to arrangement.');
+    }
+
     public function updateStatus(Request $request, Order $order)
     {
-        $request->validate(['status' => 'required|string|in:In Arrangement,Out for Delivery,Delivered,Cancelled']);
-        $order->update(['status' => $request->input('status')]);
-        return back()->with('success', 'Order status updated.');
+        $data = $request->validate([
+            'status' => 'required|string|in:Pending,In Arrangement,Out for Delivery,Delivered,Cancelled',
+        ]);
+
+        $order->update(['status' => $data['status']]);
+        return back()->with('success', 'Order status updated to ' . $data['status']);
     }
 
     // ─── Products ───────────────────────────────────────────────────────────────
@@ -82,10 +91,14 @@ class AdminController extends Controller
             'description' => 'required|string',
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
-            'image'       => 'nullable|string',
-            'categories'  => 'array',
-            'categories.*'=> 'integer|exists:categories,id',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120',
+            'categories'  => 'nullable|string',
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = '/storage/' . $request->file('image')->store('products', 'public');
+        }
 
         $product = Product::create([
             'id'          => $data['id'],
@@ -93,11 +106,12 @@ class AdminController extends Controller
             'description' => $data['description'],
             'price'       => $data['price'],
             'stock'       => $data['stock'],
-            'image'       => $data['image'] ?? null,
+            'image'       => $imagePath,
         ]);
 
         if (!empty($data['categories'])) {
-            $product->categories()->sync($data['categories']);
+            $categoryIds = array_filter(explode(',', $data['categories']));
+            $product->categories()->sync($categoryIds);
         }
 
         return back()->with('success', 'Product created successfully.');
@@ -110,20 +124,30 @@ class AdminController extends Controller
             'description' => 'required|string',
             'price'       => 'required|numeric|min:0',
             'stock'       => 'required|integer|min:0',
-            'image'       => 'nullable|string',
-            'categories'  => 'array',
-            'categories.*'=> 'integer|exists:categories,id',
+            'image'       => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120',
+            'categories'  => 'nullable|string',
         ]);
+
+        $imagePath = $product->image;
+        if ($request->hasFile('image')) {
+            // Delete old image if it exists in storage
+            if ($product->image && str_starts_with($product->image, '/storage/')) {
+                $oldPath = str_replace('/storage/', '', $product->image);
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($oldPath);
+            }
+            $imagePath = '/storage/' . $request->file('image')->store('products', 'public');
+        }
 
         $product->update([
             'name'        => $data['name'],
             'description' => $data['description'],
             'price'       => $data['price'],
             'stock'       => $data['stock'],
-            'image'       => $data['image'] ?? $product->image,
+            'image'       => $imagePath,
         ]);
 
-        $product->categories()->sync($data['categories'] ?? []);
+        $categoryIds = !empty($data['categories']) ? array_filter(explode(',', $data['categories'])) : [];
+        $product->categories()->sync($categoryIds);
 
         return back()->with('success', 'Product updated successfully.');
     }
@@ -196,47 +220,5 @@ class AdminController extends Controller
         }
         $user->delete();
         return back()->with('success', 'User deleted.');
-    }
-
-    // ─── Delivery Zones ─────────────────────────────────────────────────────────
-
-    public function deliveryIndex()
-    {
-        $zones = DeliveryZone::orderBy('name')->get();
-        return Inertia::render('Admin/Delivery', [
-            'dbZones' => $zones,
-        ]);
-    }
-
-    public function storeDelivery(Request $request)
-    {
-        $data = $request->validate([
-            'name'           => 'required|string|max:255',
-            'area'           => 'nullable|string|max:255',
-            'fee'            => 'required|numeric|min:0',
-            'estimated_time' => 'nullable|string|max:100',
-            'is_active'      => 'boolean',
-        ]);
-        DeliveryZone::create($data);
-        return back()->with('success', 'Delivery zone created.');
-    }
-
-    public function updateDelivery(Request $request, DeliveryZone $zone)
-    {
-        $data = $request->validate([
-            'name'           => 'required|string|max:255',
-            'area'           => 'nullable|string|max:255',
-            'fee'            => 'required|numeric|min:0',
-            'estimated_time' => 'nullable|string|max:100',
-            'is_active'      => 'boolean',
-        ]);
-        $zone->update($data);
-        return back()->with('success', 'Delivery zone updated.');
-    }
-
-    public function destroyDelivery(DeliveryZone $zone)
-    {
-        $zone->delete();
-        return back()->with('success', 'Delivery zone deleted.');
     }
 }

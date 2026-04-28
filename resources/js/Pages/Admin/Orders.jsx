@@ -3,12 +3,13 @@ import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 const STATUS_COLORS = {
+    'Pending': 'bg-pink-100 text-pink-800 border-pink-200',
     'In Arrangement': 'bg-amber-100 text-amber-800 border-amber-200',
     'Out for Delivery': 'bg-blue-100 text-blue-800 border-blue-200',
     'Delivered': 'bg-emerald-100 text-emerald-800 border-emerald-200',
     'Cancelled': 'bg-red-100 text-red-800 border-red-200',
 };
-const STATUS_OPTIONS = ['In Arrangement', 'Out for Delivery', 'Delivered', 'Cancelled'];
+const STATUS_OPTIONS = ['Pending', 'In Arrangement', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
 export default function AdminOrders({ dbOrders = [] }) {
     const { props } = usePage();
@@ -28,7 +29,11 @@ export default function AdminOrders({ dbOrders = [] }) {
         router.patch(`/admin/orders/${orderId}/status`, { status }, { preserveScroll: true });
     };
 
-    const totalRevenue = dbOrders.filter(o => o.status !== 'Cancelled').reduce((s, o) => s + parseFloat(o.total || 0), 0);
+    const handleConfirm = (orderId) => {
+        router.post(`/admin/orders/${orderId}/confirm`, {}, { preserveScroll: true });
+    };
+
+    const totalRevenue = dbOrders.filter(o => o.status !== 'Cancelled' && o.status !== 'Pending').reduce((s, o) => s + parseFloat(o.total || 0), 0);
 
     return (
         <>
@@ -37,7 +42,7 @@ export default function AdminOrders({ dbOrders = [] }) {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-black text-brand-900">Orders</h1>
-                        <p className="text-brand-400 text-sm mt-1">{dbOrders.length} total · ${totalRevenue.toFixed(2)} revenue</p>
+                        <p className="text-brand-400 text-sm mt-1">{dbOrders.length} total · ${totalRevenue.toFixed(2)} confirmed revenue</p>
                     </div>
                 </div>
 
@@ -46,7 +51,12 @@ export default function AdminOrders({ dbOrders = [] }) {
                 )}
 
                 {/* Status stat cards */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                    <button onClick={() => setStatusFilter('all')}
+                        className={`rounded-2xl border p-4 text-left transition-all hover:shadow-md ${statusFilter === 'all' ? 'border-brand-400 bg-brand-50 ring-2 ring-brand-300' : 'border-pink-200 bg-white'}`}>
+                        <p className="text-xs font-semibold text-brand-400">All</p>
+                        <p className="text-2xl font-black text-brand-800 mt-1">{dbOrders.length}</p>
+                    </button>
                     {STATUS_OPTIONS.map(s => (
                         <button key={s} onClick={() => setStatusFilter(statusFilter === s ? 'all' : s)}
                             className={`rounded-2xl border p-4 text-left transition-all hover:shadow-md ${statusFilter === s ? 'border-brand-400 bg-brand-50 ring-2 ring-brand-300' : 'border-pink-200 bg-white'}`}>
@@ -81,7 +91,7 @@ export default function AdminOrders({ dbOrders = [] }) {
                             <table className="w-full text-sm">
                                 <thead>
                                     <tr className="border-b border-pink-100 bg-brand-50">
-                                        {['Order', 'Customer', 'Total', 'Status', 'Date', 'Details'].map(h => (
+                                        {['Order', 'Customer', 'Total', 'Status', 'Date', 'Actions'].map(h => (
                                             <th key={h} className="text-left px-6 py-4 font-black text-brand-400 text-xs uppercase tracking-widest">{h}</th>
                                         ))}
                                     </tr>
@@ -100,12 +110,20 @@ export default function AdminOrders({ dbOrders = [] }) {
                                                 </td>
                                                 <td className="px-6 py-4 font-black text-brand-800">${parseFloat(order.total||0).toFixed(2)}</td>
                                                 <td className="px-6 py-4">
-                                                    <select value={order.status} onChange={e => handleStatusChange(order.id, e.target.value)}
-                                                        className={`rounded-full border px-3 py-1.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
-                                                        {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                                                    </select>
+                                                    <div className="flex flex-col gap-2">
+                                                        <select value={order.status} onChange={e => handleStatusChange(order.id, e.target.value)}
+                                                            className={`rounded-full border px-3 py-1.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-brand-400 cursor-pointer ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-700 border-gray-200'}`}>
+                                                            {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                                                        </select>
+                                                        {order.status === 'Pending' && (
+                                                            <button onClick={() => handleConfirm(order.id)}
+                                                                className="rounded-full bg-brand-600 text-white py-1.5 text-[10px] font-black uppercase tracking-wider hover:bg-brand-700 transition-all shadow-sm">
+                                                                Confirm Order
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </td>
-                                                <td className="px-6 py-4 text-brand-500 text-xs">
+                                                <td className="px-6 py-4 text-brand-500 text-xs whitespace-nowrap">
                                                     {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -119,24 +137,53 @@ export default function AdminOrders({ dbOrders = [] }) {
                                                 <tr>
                                                     <td colSpan={6} className="px-6 py-4 bg-brand-50/50">
                                                         <div className="rounded-2xl border border-pink-100 bg-white p-4">
-                                                            <p className="text-xs font-black text-brand-400 uppercase tracking-widest mb-3">Order Items</p>
+                                                            <div className="flex items-center justify-between mb-4">
+                                                                <p className="text-xs font-black text-brand-400 uppercase tracking-widest">Order Items</p>
+                                                                <div className="flex gap-2">
+                                                                    {order.status === 'Pending' && (
+                                                                        <button onClick={() => handleConfirm(order.id)} className="bg-brand-600 text-white px-4 py-1.5 rounded-full text-xs font-bold hover:bg-brand-700">Confirm Now</button>
+                                                                    )}
+                                                                    {order.status === 'In Arrangement' && (
+                                                                        <button onClick={() => handleStatusChange(order.id, 'Out for Delivery')} className="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold hover:bg-blue-700">Ready for Delivery</button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
                                                             <div className="space-y-2">
                                                                 {(order.items || []).map((item, idx) => (
                                                                     <div key={idx} className="flex justify-between items-center py-2 border-b border-pink-50 last:border-0">
-                                                                        <div>
-                                                                            <p className="font-bold text-brand-800 text-sm">{item.product?.name || item.product_id}</p>
-                                                                            {item.note && <p className="text-xs text-brand-400">Note: {item.note}</p>}
-                                                                            {item.wrap && <p className="text-xs text-brand-400">Wrap: {item.wrap}</p>}
+                                                                        <div className="flex items-center gap-3">
+                                                                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-brand-50 border border-pink-100">
+                                                                                {item.product?.image ? (
+                                                                                    <img src={item.product.image} className="w-full h-full object-cover" />
+                                                                                ) : <div className="w-full h-full flex items-center justify-center text-sm">🌸</div>}
+                                                                            </div>
+                                                                            <div>
+                                                                                <p className="font-bold text-brand-800 text-sm">{item.product?.name || item.product_id}</p>
+                                                                                {item.note && <p className="text-[10px] text-brand-400 italic">"{item.note}"</p>}
+                                                                                {item.wrap && <p className="text-[10px] text-brand-400 font-semibold">Wrap: {item.wrap}</p>}
+                                                                            </div>
                                                                         </div>
                                                                         <span className="font-black text-brand-600">× {item.quantity}</span>
                                                                     </div>
                                                                 ))}
                                                             </div>
-                                                            <div className="mt-3 pt-3 border-t border-pink-100 grid grid-cols-2 gap-2 text-xs text-brand-500">
-                                                                <p><span className="font-bold text-brand-700">Address:</span> {order.delivery_address}</p>
-                                                                <p><span className="font-bold text-brand-700">Phone:</span> {order.contact_phone}</p>
-                                                                <p><span className="font-bold text-brand-700">Payment:</span> {order.payment_method}</p>
-                                                                {order.maps_url && <p><a href={order.maps_url} target="_blank" rel="noreferrer" className="text-brand-600 font-bold hover:underline">📍 View on Map</a></p>}
+                                                            <div className="mt-4 pt-4 border-t border-pink-100 grid grid-cols-2 gap-4 text-xs text-brand-500">
+                                                                <div className="space-y-1">
+                                                                    <p><span className="font-bold text-brand-700">Address:</span> {order.delivery_address}</p>
+                                                                    <p><span className="font-bold text-brand-700">Phone:</span> {order.contact_phone}</p>
+                                                                </div>
+                                                                <div className="space-y-1">
+                                                                    <p><span className="font-bold text-brand-700">Payment:</span> {order.payment_method}</p>
+                                                                    {order.maps_url && (
+                                                                        <a href={order.maps_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-brand-600 font-bold hover:underline">
+                                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                                                                            </svg>
+                                                                            View on Map
+                                                                        </a>
+                                                                    )}
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </td>

@@ -38,6 +38,11 @@ class AuthenticatedSessionController extends Controller
             return redirect()->intended(route('admin.index', absolute: false));
         }
 
+        // Redirect rider users to rider dashboard
+        if ($request->user()->role === 'rider') {
+            return redirect()->intended(route('rider.index', absolute: false));
+        }
+
         return redirect()->intended(route('home', absolute: false));
     }
 

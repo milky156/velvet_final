@@ -5,7 +5,7 @@ function clamp(n: number, min: number, max: number) {
 }
 
 function formatMoney(n: number) {
-  return `$${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  return `₱${n.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
 }
 
 export function MiniStat({

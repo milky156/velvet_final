@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
@@ -42,8 +42,6 @@ function ConfirmModal({ isOpen, onClose, onConfirm, message }) {
     );
 }
 
-const emptyForm = { id: '', name: '', description: '', price: '', stock: '', image: '', categories: [] };
-
 export default function AdminProducts({ dbProducts = [], dbCategories = [] }) {
     const { props } = usePage();
     const flash = props.flash || {};
@@ -51,33 +49,73 @@ export default function AdminProducts({ dbProducts = [], dbCategories = [] }) {
     const [showModal, setShowModal] = useState(false);
     const [editProduct, setEditProduct] = useState(null);
     const [confirmDelete, setConfirmDelete] = useState(null);
-    const [form, setForm] = useState(emptyForm);
     const [errors, setErrors] = useState({});
+
+    // Form state
+    const [formId, setFormId] = useState('');
+    const [formName, setFormName] = useState('');
+    const [formDesc, setFormDesc] = useState('');
+    const [formPrice, setFormPrice] = useState('');
+    const [formStock, setFormStock] = useState('');
+    const [formCategories, setFormCategories] = useState([]);
+    const [imageFile, setImageFile] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
+    const fileInputRef = useRef(null);
 
     const filtered = dbProducts.filter(p =>
         !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase())
     );
 
-    const openCreate = () => { setEditProduct(null); setForm(emptyForm); setErrors({}); setShowModal(true); };
+    const resetForm = () => {
+        setFormId(''); setFormName(''); setFormDesc('');
+        setFormPrice(''); setFormStock(''); setFormCategories([]);
+        setImageFile(null); setImagePreview(null); setErrors({});
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const openCreate = () => { setEditProduct(null); resetForm(); setShowModal(true); };
     const openEdit = (p) => {
         setEditProduct(p);
-        setForm({ id: p.id, name: p.name, description: p.description, price: p.price, stock: p.stock, image: p.image || '', categories: p.categories?.map(c => c.id) || [] });
+        setFormId(p.id); setFormName(p.name); setFormDesc(p.description);
+        setFormPrice(p.price); setFormStock(p.stock);
+        setFormCategories(p.categories?.map(c => c.id) || []);
+        setImageFile(null); setImagePreview(p.image || null);
         setErrors({});
         setShowModal(true);
     };
 
+    const handleImageChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImageFile(file);
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        const data = { ...form, price: parseFloat(form.price), stock: parseInt(form.stock) };
+
+        const formData = new FormData();
+        formData.append('name', formName);
+        formData.append('description', formDesc);
+        formData.append('price', formPrice);
+        formData.append('stock', formStock);
+        formData.append('categories', formCategories.join(','));
+        if (imageFile) formData.append('image', imageFile);
+
         if (editProduct) {
-            router.put(`/admin/products/${editProduct.id}`, data, {
-                onSuccess: () => setShowModal(false),
+            formData.append('_method', 'PUT');
+            router.post(`/admin/products/${editProduct.id}`, formData, {
+                forceFormData: true,
+                onSuccess: () => { setShowModal(false); resetForm(); },
                 onError: (e) => setErrors(e),
                 preserveScroll: true,
             });
         } else {
-            router.post('/admin/products', data, {
-                onSuccess: () => setShowModal(false),
+            formData.append('id', formId);
+            router.post('/admin/products', formData, {
+                forceFormData: true,
+                onSuccess: () => { setShowModal(false); resetForm(); },
                 onError: (e) => setErrors(e),
                 preserveScroll: true,
             });
@@ -89,7 +127,7 @@ export default function AdminProducts({ dbProducts = [], dbCategories = [] }) {
     };
 
     const toggleCategory = (id) => {
-        setForm(f => ({ ...f, categories: f.categories.includes(id) ? f.categories.filter(c => c !== id) : [...f.categories, id] }));
+        setFormCategories(prev => prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]);
     };
 
     return (
@@ -122,7 +160,13 @@ export default function AdminProducts({ dbProducts = [], dbCategories = [] }) {
 
                 <div className="rounded-3xl border border-pink-200 bg-white shadow-sm overflow-hidden">
                     {filtered.length === 0 ? (
-                        <div className="py-20 text-center text-brand-300 font-semibold">No products found.</div>
+                        <div className="py-20 text-center">
+                            <div className="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-4">
+                                <span className="text-3xl">🌸</span>
+                            </div>
+                            <p className="text-brand-400 font-bold">No products yet</p>
+                            <p className="text-brand-300 text-sm mt-1">Click "Add Product" to create your first one.</p>
+                        </div>
                     ) : (
                         <div className="overflow-x-auto">
                             <table className="w-full text-sm">
@@ -180,42 +224,104 @@ export default function AdminProducts({ dbProducts = [], dbCategories = [] }) {
             </div>
 
             {/* Create/Edit Modal */}
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={editProduct ? 'Edit Product' : 'Add New Product'}>
+            <Modal isOpen={showModal} onClose={() => { setShowModal(false); resetForm(); }} title={editProduct ? 'Edit Product' : 'Add New Product'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Product ID (create only) */}
                     {!editProduct && (
                         <div>
                             <label className="block text-xs font-bold text-brand-700 mb-1">Product ID <span className="text-red-500">*</span></label>
-                            <input value={form.id} onChange={e => setForm(f => ({...f, id: e.target.value}))} placeholder="e.g. blush-bloom"
+                            <input value={formId} onChange={e => setFormId(e.target.value)} placeholder="e.g. blush-bloom"
                                 className="w-full rounded-xl border border-pink-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" required />
                             {errors.id && <p className="text-red-500 text-xs mt-1">{errors.id}</p>}
                         </div>
                     )}
-                    {[{ key: 'name', label: 'Name', type: 'text' }, { key: 'price', label: 'Price ($)', type: 'number' }, { key: 'stock', label: 'Stock', type: 'number' }, { key: 'image', label: 'Image URL', type: 'text' }].map(field => (
-                        <div key={field.key}>
-                            <label className="block text-xs font-bold text-brand-700 mb-1">{field.label} {field.key !== 'image' && <span className="text-red-500">*</span>}</label>
-                            <input value={form[field.key]} onChange={e => setForm(f => ({...f, [field.key]: e.target.value}))} type={field.type} step={field.type === 'number' ? '0.01' : undefined}
-                                className="w-full rounded-xl border border-pink-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" required={field.key !== 'image'} />
-                            {errors[field.key] && <p className="text-red-500 text-xs mt-1">{errors[field.key]}</p>}
+
+                    {/* Name */}
+                    <div>
+                        <label className="block text-xs font-bold text-brand-700 mb-1">Name <span className="text-red-500">*</span></label>
+                        <input value={formName} onChange={e => setFormName(e.target.value)} placeholder="Product name"
+                            className="w-full rounded-xl border border-pink-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" required />
+                        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+                    </div>
+
+                    {/* Price + Stock in a row */}
+                    <div className="grid grid-cols-2 gap-3">
+                        <div>
+                            <label className="block text-xs font-bold text-brand-700 mb-1">Price ($) <span className="text-red-500">*</span></label>
+                            <input value={formPrice} onChange={e => setFormPrice(e.target.value)} type="number" step="0.01" placeholder="0.00"
+                                className="w-full rounded-xl border border-pink-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" required />
+                            {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}
                         </div>
-                    ))}
+                        <div>
+                            <label className="block text-xs font-bold text-brand-700 mb-1">Stock <span className="text-red-500">*</span></label>
+                            <input value={formStock} onChange={e => setFormStock(e.target.value)} type="number" placeholder="0"
+                                className="w-full rounded-xl border border-pink-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" required />
+                            {errors.stock && <p className="text-red-500 text-xs mt-1">{errors.stock}</p>}
+                        </div>
+                    </div>
+
+                    {/* Description */}
                     <div>
                         <label className="block text-xs font-bold text-brand-700 mb-1">Description <span className="text-red-500">*</span></label>
-                        <textarea value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} rows={2}
+                        <textarea value={formDesc} onChange={e => setFormDesc(e.target.value)} rows={2} placeholder="Describe the product…"
                             className="w-full rounded-xl border border-pink-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 resize-none" required />
+                        {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                     </div>
+
+                    {/* Image Upload */}
+                    <div>
+                        <label className="block text-xs font-bold text-brand-700 mb-2">Product Photo</label>
+                        <div className="flex items-start gap-4">
+                            {/* Preview */}
+                            <div className="w-24 h-24 rounded-2xl border-2 border-dashed border-pink-200 bg-brand-50 overflow-hidden shrink-0 flex items-center justify-center">
+                                {imagePreview ? (
+                                    <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="text-center">
+                                        <span className="text-2xl">📷</span>
+                                        <p className="text-[10px] text-brand-300 mt-1">No image</p>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                    onChange={handleImageChange}
+                                    className="hidden"
+                                    id="product-image-upload"
+                                />
+                                <label htmlFor="product-image-upload"
+                                    className="inline-flex items-center gap-2 rounded-xl border border-pink-200 bg-white px-4 py-2.5 text-sm font-bold text-brand-600 cursor-pointer hover:bg-brand-50 transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                    </svg>
+                                    {imageFile ? 'Change Photo' : 'Upload Photo'}
+                                </label>
+                                <p className="text-[11px] text-brand-300 mt-1.5">JPG, PNG, WebP or GIF · Max 5MB</p>
+                                {imageFile && <p className="text-xs text-brand-500 mt-1 font-semibold truncate">{imageFile.name}</p>}
+                                {errors.image && <p className="text-red-500 text-xs mt-1">{errors.image}</p>}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Categories */}
                     <div>
                         <label className="block text-xs font-bold text-brand-700 mb-2">Categories</label>
                         <div className="flex flex-wrap gap-2">
                             {dbCategories.map(cat => (
                                 <button key={cat.id} type="button" onClick={() => toggleCategory(cat.id)}
-                                    className={`rounded-full px-3 py-1.5 text-xs font-bold border transition-all ${form.categories.includes(cat.id) ? 'bg-brand-600 text-white border-brand-600' : 'border-pink-200 text-brand-600 hover:bg-brand-50'}`}>
+                                    className={`rounded-full px-3 py-1.5 text-xs font-bold border transition-all ${formCategories.includes(cat.id) ? 'bg-brand-600 text-white border-brand-600' : 'border-pink-200 text-brand-600 hover:bg-brand-50'}`}>
                                     {cat.name}
                                 </button>
                             ))}
                         </div>
                     </div>
+
+                    {/* Actions */}
                     <div className="flex gap-3 pt-2">
-                        <button type="button" onClick={() => setShowModal(false)} className="flex-1 rounded-xl border border-brand-200 py-3 font-bold text-brand-600 hover:bg-brand-50 transition-all">Cancel</button>
+                        <button type="button" onClick={() => { setShowModal(false); resetForm(); }} className="flex-1 rounded-xl border border-brand-200 py-3 font-bold text-brand-600 hover:bg-brand-50 transition-all">Cancel</button>
                         <button type="submit" className="flex-1 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 py-3 font-bold text-white hover:opacity-90 transition-all">
                             {editProduct ? 'Save Changes' : 'Create Product'}
                         </button>

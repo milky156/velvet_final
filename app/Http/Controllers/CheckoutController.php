@@ -46,7 +46,7 @@ class CheckoutController extends Controller
             'customer_name'    => $user?->name ?? $request->input('customerName', 'Guest'),
             'customer_email'   => $user?->email ?? $request->input('customerEmail', 'guest@order.com'),
             'total'            => $total,
-            'status'           => 'In Arrangement',
+            'status'           => 'Pending',
             'delivery_address' => $request->input('deliveryAddress'),
             'delivery_lat'     => $lat,
             'delivery_lng'     => $lng,

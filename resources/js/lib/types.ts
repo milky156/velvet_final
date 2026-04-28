@@ -1,3 +1,4 @@
+export type UserRole = "customer" | "admin" | "rider" | null;
 export type ProductCategory = "Occasion" | "FlowerType" | "Price";
 
 export type Product = {
@@ -7,7 +8,7 @@ export type Product = {
   price: number;
   stock: number;
   image: string;
-  categories: string[];
+  categories: { id: number; name: string; type: string }[];
 };
 
 export type CartItem = {
@@ -20,20 +21,30 @@ export type CartItem = {
 export type OrderStatus = "In Arrangement" | "Out for Delivery" | "Delivered" | "Canceled" | "Returned";
 
 export type Order = {
-  id: string;
+  id: string | number;
   items: CartItem[];
   total: number;
   createdAt: string;
-  status: OrderStatus;
-  deliveryAddress: string;
+  created_at?: string;
+  status: string;
+  deliveryAddress?: string;
+  delivery_address?: string;
   deliveryLat?: number;
+  delivery_lat?: number;
   deliveryLng?: number;
-  contactPhone: string;
-  deliveryOption: "Standard" | "Express" | "Same-day";
-  paymentMethod: "Credit Card" | "PayPal" | "Cash on Delivery";
-  mapsUrl: string;
-  customerName: string;
-  customerEmail: string;
+  delivery_lng?: number;
+  contactPhone?: string;
+  contact_phone?: string;
+  deliveryOption?: string;
+  delivery_option?: string;
+  paymentMethod?: string;
+  payment_method?: string;
+  mapsUrl?: string;
+  maps_url?: string;
+  customerName?: string;
+  customer_name?: string;
+  customerEmail?: string;
+  customer_email?: string;
 };
 
 export type Profile = {

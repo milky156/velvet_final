@@ -5,7 +5,9 @@ import { SiteHeader } from '@/Components/SiteHeader';
 import ChatWidget from '@/Components/ChatWidget';
 
 export default function ShopLayout({ children }) {
-    const { dbProducts, dbOrders } = usePage().props;
+    const { props } = usePage();
+    const dbProducts = props.dbProducts;
+    const dbOrders = props.dbOrders;
 
     return (
         <div className="min-h-screen bg-brand-50 text-brand-900 antialiased selection:bg-brand-200 relative">
