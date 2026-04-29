@@ -42,7 +42,7 @@ export default function AdminOrders({ dbOrders = [] }) {
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-3xl font-black text-brand-900">Orders</h1>
-                        <p className="text-brand-400 text-sm mt-1">{dbOrders.length} total · ${totalRevenue.toFixed(2)} confirmed revenue</p>
+                        <p className="text-brand-400 text-sm mt-1">{dbOrders.length} total · ₱{totalRevenue.toFixed(2)} confirmed revenue</p>
                     </div>
                 </div>
 
@@ -108,7 +108,7 @@ export default function AdminOrders({ dbOrders = [] }) {
                                                     <p className="font-bold text-brand-800">{order.customer_name}</p>
                                                     <p className="text-xs text-brand-400">{order.customer_email}</p>
                                                 </td>
-                                                <td className="px-6 py-4 font-black text-brand-800">${parseFloat(order.total||0).toFixed(2)}</td>
+                                                <td className="px-6 py-4 font-black text-brand-800">₱{parseFloat(order.total||0).toFixed(2)}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex flex-col gap-2">
                                                         <select value={order.status} onChange={e => handleStatusChange(order.id, e.target.value)}

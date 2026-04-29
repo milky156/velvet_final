@@ -109,7 +109,7 @@ export default function Home() {
               <h3 className="mt-3 text-xl font-bold text-pink-800">{product.name}</h3>
               <p className="mt-1 text-sm text-pink-600">{product.description}</p>
               <div className="mt-3 flex items-center justify-between">
-                <p className="text-lg font-bold text-pink-700">₱{product.price.toFixed(2)}</p>
+                <p className="text-lg font-bold text-pink-700">₱{Number(product.price).toFixed(2)}</p>
                 <button
                   onClick={() => addToCart(product.id, 1, "Dedication: ", "Paper wrap (Korean style)")}
                   className="rounded-full bg-pink-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-pink-700"

@@ -151,9 +151,9 @@ export default function CartPage() {
                   {/* Product info */}
                   <div>
                     <h2 className="text-lg font-bold text-pink-700">{entry.product?.name ?? "Unknown Product"}</h2>
-                    <p className="text-sm text-pink-600">₱{entry.product?.price?.toFixed(2) ?? "0.00"} each</p>
+                    <p className="text-sm text-pink-600">₱{Number(entry.product?.price ?? 0).toFixed(2)} each</p>
                     <p className="text-sm font-bold text-pink-700 mt-1">
-                      Subtotal: ₱{((entry.product?.price ?? 0) * entry.item.quantity).toFixed(2)}
+                      Subtotal: ₱{(Number(entry.product?.price ?? 0) * entry.item.quantity).toFixed(2)}
                     </p>
                   </div>
 
@@ -235,7 +235,7 @@ export default function CartPage() {
             <article className="rounded-3xl border border-pink-200 bg-white p-6 shadow-sm">
               <h2 className="text-xl font-bold text-pink-700">Order Summary</h2>
               <p className="mt-2 text-base text-pink-700">Total Items: {totalItems}</p>
-              <p className="text-2xl font-bold text-pink-800">Total: ₱{cartTotal.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-pink-800">Total: ₱{Number(cartTotal).toFixed(2)}</p>
 
               {!showDelivery ? (
                 <div className="mt-4">

@@ -116,7 +116,7 @@ export default function AdminDelivery({ dbZones = [] }) {
                                         <tr key={zone.id} className="hover:bg-brand-50/50 transition-colors">
                                             <td className="px-6 py-4 font-bold text-brand-800">{zone.name}</td>
                                             <td className="px-6 py-4 text-brand-500">{zone.area || '—'}</td>
-                                            <td className="px-6 py-4 font-black text-brand-700">${parseFloat(zone.fee||0).toFixed(2)}</td>
+                                            <td className="px-6 py-4 font-black text-brand-700">₱{parseFloat(zone.fee||0).toFixed(2)}</td>
                                             <td className="px-6 py-4 text-brand-500">{zone.estimated_time || '—'}</td>
                                             <td className="px-6 py-4">
                                                 <button onClick={() => handleToggle(zone)}
@@ -145,7 +145,7 @@ export default function AdminDelivery({ dbZones = [] }) {
                     {[
                         { key: 'name', label: 'Zone Name', placeholder: 'e.g. Downtown', required: true },
                         { key: 'area', label: 'Area / Coverage', placeholder: 'e.g. City Center, 5km radius' },
-                        { key: 'fee', label: 'Delivery Fee ($)', placeholder: '0.00', type: 'number' },
+                        { key: 'fee', label: 'Delivery Fee (₱)', placeholder: '0.00', type: 'number' },
                         { key: 'estimated_time', label: 'Estimated Time', placeholder: 'e.g. 30-45 mins' },
                     ].map(f => (
                         <div key={f.key}>

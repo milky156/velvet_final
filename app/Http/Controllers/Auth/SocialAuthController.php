@@ -17,8 +17,13 @@ class SocialAuthController extends Controller
 
     public function handleGoogleCallback()
     {
+        \Log::info('Google callback reached');
         try {
-            $googleUser = Socialite::driver('google')->user();
+            // Disable SSL verification for local development (common issue on Windows)
+            $googleUser = Socialite::driver('google')
+                ->setHttpClient(new \GuzzleHttp\Client(['verify' => false]))
+                ->user();
+            \Log::info('Google user retrieved: ' . $googleUser->email);
             
             $user = User::updateOrCreate([
                 'email' => $googleUser->email,
@@ -32,6 +37,10 @@ class SocialAuthController extends Controller
 
             return redirect()->intended(route('home', absolute: false));
         } catch (\Exception $e) {
+            \Log::error('Google Auth Error: ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->route('login')->with('status', 'Google authentication failed.');
         }
     }

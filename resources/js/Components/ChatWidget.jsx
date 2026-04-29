@@ -126,7 +126,7 @@ export default function ChatWidget() {
                                                 <img src={p.image} alt={p.name} className="w-10 h-10 rounded-md object-cover" />
                                                 <div>
                                                     <p className="text-sm font-bold text-brand-900">{p.name}</p>
-                                                    <p className="text-xs text-brand-600">${Number(p.price).toFixed(2)}</p>
+                                                    <p className="text-xs text-brand-600">₱{Number(p.price).toFixed(2)}</p>
                                                 </div>
                                             </div>
                                         ))}

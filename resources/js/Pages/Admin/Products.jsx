@@ -195,7 +195,7 @@ export default function AdminProducts({ dbProducts = [], dbCategories = [] }) {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 font-black text-brand-700">${parseFloat(product.price||0).toFixed(2)}</td>
+                                            <td className="px-6 py-4 font-black text-brand-700">₱{parseFloat(product.price||0).toFixed(2)}</td>
                                             <td className="px-6 py-4">
                                                 <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-bold border ${product.stock <= 3 ? 'bg-red-100 text-red-700 border-red-200' : product.stock <= 8 ? 'bg-amber-100 text-amber-700 border-amber-200' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>
                                                     {product.stock} in stock
@@ -247,7 +247,7 @@ export default function AdminProducts({ dbProducts = [], dbCategories = [] }) {
                     {/* Price + Stock in a row */}
                     <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <label className="block text-xs font-bold text-brand-700 mb-1">Price ($) <span className="text-red-500">*</span></label>
+                            <label className="block text-xs font-bold text-brand-700 mb-1">Price (₱) <span className="text-red-500">*</span></label>
                             <input value={formPrice} onChange={e => setFormPrice(e.target.value)} type="number" step="0.01" placeholder="0.00"
                                 className="w-full rounded-xl border border-pink-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400" required />
                             {errors.price && <p className="text-red-500 text-xs mt-1">{errors.price}</p>}

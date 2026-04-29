@@ -154,18 +154,18 @@ export default function AdminPage({ dbOrders = [], dbProducts = [], dbUsers = []
                                     </span>
                                     Live Performance
                                 </div>
-                                <h2 className="text-3xl font-black text-brand-900">Store Activity</h2>
-                                <p className="mt-2 text-sm text-brand-400 font-medium leading-relaxed">Today's sales performance and customer growth metrics compared to yesterday.</p>
+                                <h2 className="text-3xl font-black text-brand-900 tracking-tight">Store Activity</h2>
+                                <p className="mt-2 text-sm text-brand-400 font-medium leading-relaxed max-w-sm">Today's sales performance and customer growth metrics compared to yesterday.</p>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="rounded-2xl border border-pink-200 bg-brand-50 p-5">
+                                <div className="rounded-2xl border border-pink-200 bg-brand-50 p-5 flex flex-col items-center justify-center text-center">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-pink-700/60">Today's Sales</p>
-                                    <p className="mt-2 text-2xl font-black text-brand-900">₱{todaysSales.toLocaleString()}</p>
+                                    <p className="mt-2 text-2xl font-black text-brand-900 leading-tight">₱{todaysSales.toLocaleString()}</p>
                                     <p className="mt-1 text-[11px] font-bold text-pink-500">{todaysOrders.length} confirmed orders</p>
                                 </div>
-                                <div className="rounded-2xl border border-pink-200 bg-brand-50 p-5">
+                                <div className="rounded-2xl border border-pink-200 bg-brand-50 p-5 flex flex-col items-center justify-center text-center">
                                     <p className="text-[10px] font-black uppercase tracking-widest text-pink-700/60">Growth</p>
-                                    <p className={`mt-2 text-2xl font-black ${growthRate >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                    <p className={`mt-2 text-2xl font-black ${growthRate >= 0 ? 'text-emerald-600' : 'text-red-500'} leading-tight whitespace-nowrap`}>
                                         {growthRate >= 0 ? "+" : ""}{growthRate.toFixed(1)}%
                                     </p>
                                     <p className="mt-1 text-[11px] font-bold text-pink-500">vs yesterday</p>

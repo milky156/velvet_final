@@ -11,6 +11,11 @@ class Product extends Model
 
     protected $fillable = ['id', 'name', 'description', 'price', 'stock', 'image'];
 
+    protected $casts = [
+        'price' => 'float',
+        'stock' => 'integer',
+    ];
+
     public function categories()
     {
         return $this->belongsToMany(Category::class);
