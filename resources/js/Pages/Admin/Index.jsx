@@ -1,5 +1,6 @@
-import React, { useState } from "react";
-import { Head, Link } from "@inertiajs/react";
+import React, { useState, useEffect } from "react";
+import { Head, Link, usePage } from "@inertiajs/react";
+import axios from "axios";
 import { BouquetHeroIllustration } from "@/Components/admin/AdminIllustration";
 import {
     BestSellerBouquets,
@@ -12,9 +13,53 @@ import {
 import AdminLayout from "@/Layouts/AdminLayout";
 
 export default function AdminPage({ dbOrders = [], dbProducts = [], dbUsers = [], stats = {} }) {
+    const { auth } = usePage().props;
+    const authUser = auth?.user;
     const [selectedContact, setSelectedContact] = useState(null);
     const [reply, setReply] = useState("");
     const [messages, setMessages] = useState([]);
+
+    // Derived Stats
+    const uniqueUsers = new Set(dbOrders.map(o => o.customer_email || o.user_id)).size;
+    const todaysOrders = dbOrders.filter(o => new Date(o.created_at).toDateString() === new Date().toDateString());
+    const todaysSales = todaysOrders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0);
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdaysOrders = dbOrders.filter(o => new Date(o.created_at).toDateString() === yesterday.toDateString());
+    const yesterdaysSales = yesterdaysOrders.reduce((sum, o) => sum + parseFloat(o.total || 0), 0);
+    const growthRate = yesterdaysSales === 0 ? 100 : ((todaysSales - yesterdaysSales) / yesterdaysSales) * 100;
+
+    const stockWarnings = dbProducts.filter(p => p.stock <= 5).map(p => ({
+        id: p.id,
+        name: p.name,
+        stock: p.stock,
+        image: p.image
+    }));
+
+    // Chart Data Mocking/Transformation (Simplified for now)
+    const hourBuckets = Array.from({ length: 24 }, (_, i) => ({ x: `${i}:00`, y: 0 }));
+    todaysOrders.forEach(o => {
+        const hr = new Date(o.created_at).getHours();
+        hourBuckets[hr].y += parseFloat(o.total || 0);
+    });
+
+    const monthly = [
+        { label: 'Jan', value: 0 }, { label: 'Feb', value: 0 }, { label: 'Mar', value: 0 },
+        { label: 'Apr', value: 0 }, { label: 'May', value: 0 }, { label: 'Jun', value: 0 },
+        { label: 'Jul', value: 0 }, { label: 'Aug', value: 0 }, { label: 'Sep', value: 0 },
+        { label: 'Oct', value: 0 }, { label: 'Nov', value: 0 }, { label: 'Dec', value: 0 },
+    ];
+    dbOrders.forEach(o => {
+        const m = new Date(o.created_at).getMonth();
+        monthly[m].value += parseFloat(o.total || 0);
+    });
+
+    const bestSellers = dbProducts.slice(0, 4).map(p => ({
+        name: p.name,
+        sold: Math.floor(Math.random() * 50) + 10, // Mocked sold count
+        image: p.image
+    })).sort((a, b) => b.sold - a.sold);
 
     // Fetch messages for selected contact
     useEffect(() => {
