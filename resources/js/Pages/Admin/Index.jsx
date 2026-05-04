@@ -55,11 +55,24 @@ export default function AdminPage({ dbOrders = [], dbProducts = [], dbUsers = []
         monthly[m].value += parseFloat(o.total || 0);
     });
 
-    const bestSellers = dbProducts.slice(0, 4).map(p => ({
-        name: p.name,
-        sold: Math.floor(Math.random() * 50) + 10, // Mocked sold count
-        image: p.image
-    })).sort((a, b) => b.sold - a.sold);
+    const productSales = {};
+    dbOrders.forEach(order => {
+        order.items?.forEach(item => {
+            const pid = item.product_id;
+            if (!productSales[pid]) {
+                productSales[pid] = { 
+                    name: item.product?.name || "Unknown", 
+                    sold: 0, 
+                    image: item.product?.image 
+                };
+            }
+            productSales[pid].sold += item.quantity;
+        });
+    });
+
+    const bestSellers = Object.values(productSales)
+        .sort((a, b) => b.sold - a.sold)
+        .slice(0, 4);
 
     // Fetch messages for selected contact
     useEffect(() => {

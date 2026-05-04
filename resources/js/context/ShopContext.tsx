@@ -25,7 +25,7 @@ type ShopContextType = {
     paymentMethod: string,
     deliveryLatLng?: { lat: number; lng: number } | null,
   ) => void;
-  sendMessage: (text: string, from: "customer" | "admin") => void;
+  sendMessage: (text: string, from: "customer" | "admin" | "ai") => void;
   advanceOrderStatus: (orderId: string | number) => void;
   setOrderStatus: (orderId: string | number, status: string) => void;
   signIn: (username: string, role: UserRole) => void;
@@ -168,17 +168,9 @@ export const ShopProvider = ({ children, dbProducts, dbOrders }: {
     );
   };
 
-  const sendMessage = (text: string, from: "customer" | "admin") => {
+  const sendMessage = (text: string, from: "customer" | "admin" | "ai") => {
     const newMessage: Message = { id: `msg_${Date.now()}`, from, text, createdAt: new Date().toISOString() };
     setMessages((old: Message[]) => [...old, newMessage]);
-    if (from === "customer") {
-      setTimeout(() => {
-        setMessages((old: Message[]) => [
-          ...old,
-          { id: `msg_${Date.now()}_r`, from: "admin", text: "Thanks for reaching out! Our team will get back to you shortly.", createdAt: new Date().toISOString() },
-        ]);
-      }, 1200);
-    }
   };
 
   const advanceOrderStatus = (orderId: string | number) => {

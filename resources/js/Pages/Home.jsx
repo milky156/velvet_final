@@ -21,125 +21,160 @@ export default function Home() {
   }, [products, selectedCategory]);
 
   return (
-    <section className="relative overflow-hidden bg-pink-50 pb-12 pt-12">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-          <div className="space-y-6">
-            <p className="inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-1 text-sm text-pink-700 font-semibold">
-              <span className="h-2 w-2 rounded-full bg-pink-600" />
-              New Bouquet Style
-            </p>
-            <h1 className="text-5xl font-extrabold leading-tight tracking-tight text-pink-800 lg:text-6xl">
-              Curated Florals that <br /> Speak to the Soul
-            </h1>
-            <p className="max-w-2xl text-lg text-pink-600">
-              Each flower to evoke feeling and draw hearts closer.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <button className="rounded-full bg-pink-700 px-6 py-3 text-lg font-bold text-white shadow-md transition hover:bg-pink-800">
-                Order Now
-              </button>
-              <button className="rounded-full border border-pink-500 px-6 py-3 text-lg font-semibold text-pink-700 transition hover:bg-pink-100">
-                Customize Bouquet
-              </button>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-              <div className="rounded-2xl bg-white p-4 shadow-sm">
-                <p className="text-lg font-bold text-pink-700">36K+</p>
-                <p className="text-xs text-pink-500">Monthly Users</p>
+    <div className="bg-brand-50">
+      <section className="relative overflow-hidden bg-pink-50 pb-20 pt-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <p className="inline-flex items-center gap-2 rounded-full bg-pink-100 px-4 py-1.5 text-xs text-pink-700 font-black uppercase tracking-widest">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-pink-600"></span>
+                  </span>
+                  Smart Floral Solutions
+                </p>
+                <h1 className="text-5xl font-black leading-[1.1] tracking-tight text-brand-900 lg:text-7xl">
+                  Floral Artistry <br /> <span className="text-pink-600">Perfectly Delivered.</span>
+                </h1>
+                <p className="max-w-xl text-lg text-brand-400 font-medium leading-relaxed">
+                  Experience the future of gifting with our Smart AI assistance and premium shop-to-door delivery. Every petal tells a story.
+                </p>
               </div>
-              <div className="rounded-2xl bg-white p-4 shadow-sm">
-                <p className="text-lg font-bold text-pink-700">120K</p>
-                <p className="text-xs text-pink-500">Bouquets Delivered</p>
+              
+              <div className="flex flex-wrap gap-4">
+                <button 
+                  onClick={() => document.getElementById('shop-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="rounded-full bg-brand-900 px-10 py-4 text-base font-black text-white shadow-xl shadow-brand-200 transition hover:bg-brand-800 hover:-translate-y-1 active:translate-y-0"
+                >
+                  Shop Collections
+                </button>
+                <button className="rounded-full border-2 border-brand-200 bg-white px-10 py-4 text-base font-black text-brand-900 transition hover:bg-brand-50 hover:border-brand-300">
+                  Track Delivery
+                </button>
               </div>
-            </div>
-          </div>
-          <div className="relative">
-            <div className="absolute inset-0 rounded-[2rem] bg-pink-200 blur-3xl" />
-            <div className="relative rounded-[2rem] border border-pink-100 bg-white p-5 shadow-xl">
-              <img
-                src="https://www.gardenia.net/wp-content/uploads/2023/05/types-of-flowers-780x520.webp"
-                alt="Signature bouquet"
-                className="h-72 w-full rounded-xl object-cover"
-              />
-              <div className="mt-3 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-pink-500">New Bouquet Style</p>
-                  <p className="text-lg font-bold text-pink-800">Crafting by Loves</p>
+
+              {/* Feature Highlights */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                <div className="flex items-center gap-4 rounded-3xl bg-white p-5 shadow-sm border border-brand-50">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-2xl">🤖</div>
+                  <div>
+                    <p className="text-sm font-black text-brand-900">Smart AI Support</p>
+                    <p className="text-[11px] font-bold text-brand-400 uppercase tracking-tighter">Real-time Assistance</p>
+                  </div>
                 </div>
-                <button className="rounded-full bg-pink-600 px-4 py-2 text-white">View Demo</button>
+                <div className="flex items-center gap-4 rounded-3xl bg-white p-5 shadow-sm border border-brand-50">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-2xl">🚚</div>
+                  <div>
+                    <p className="text-sm font-black text-brand-900">Doorstep Delivery</p>
+                    <p className="text-[11px] font-bold text-brand-400 uppercase tracking-tighter">Butuan City Wide</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative lg:ml-10">
+              <div className="absolute -inset-4 rounded-[3rem] bg-pink-200 blur-3xl opacity-30 animate-pulse" />
+              <div className="relative rounded-[2.5rem] border-8 border-white bg-white shadow-2xl overflow-hidden group">
+                <img
+                  src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=1000&auto=format&fit=crop"
+                  alt="Premium Floral Arrangement"
+                  className="h-[500px] w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-900/60 to-transparent" />
+                <div className="absolute bottom-8 left-8 right-8">
+                  <div className="glass p-6 rounded-2xl border border-white/20">
+                    <p className="text-xs font-black text-pink-300 uppercase tracking-widest mb-1">Visit our walk-in shop</p>
+                    <p className="text-lg font-bold text-white">Beside the New Barangay Hall <br /> San Vicente, Butuan City</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <section className="mx-auto mt-10 max-w-7xl px-6">
-        <h2 className="text-3xl font-bold text-pink-700">Order with Confidence</h2>
-
-        {/* Category Tabs */}
-        <div className="mt-6 flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${selectedCategory === cat ? 'bg-pink-600 text-white shadow-md' : 'bg-white border border-pink-200 text-pink-600 hover:bg-pink-50'}`}
-            >
-              {cat === 'all' ? 'All Products' : cat}
-            </button>
-          ))}
+      <section id="shop-section" className="mx-auto mt-24 max-w-7xl px-6 pb-24">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="space-y-2">
+            <h2 className="text-4xl font-black text-brand-900 tracking-tight">Our Floral Catalogue</h2>
+            <p className="text-brand-400 font-medium">Hand-picked, freshly cut, and artistically arranged.</p>
+          </div>
+          
+          {/* Category Tabs */}
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-6 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-all ${selectedCategory === cat ? 'bg-brand-900 text-white shadow-lg' : 'bg-white border border-brand-200 text-brand-400 hover:bg-brand-50 hover:text-brand-900'}`}
+              >
+                {cat === 'all' ? 'All' : cat}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {filteredProducts.map((product) => (
-            <article key={product.id} className="group rounded-3xl border border-pink-200 bg-white p-4 shadow-sm transition hover:shadow-lg">
-              <div className="relative h-48 overflow-hidden rounded-2xl border border-pink-100 bg-pink-50">
+            <article key={product.id} className="group relative rounded-[2rem] border border-brand-100 bg-white p-5 shadow-sm transition hover:shadow-2xl hover:border-pink-100 hover:-translate-y-1">
+              <div className="relative h-56 overflow-hidden rounded-2xl bg-brand-50">
                 {product.image ? (
                   <img
                     src={product.image}
                     alt={product.name}
-                    className="object-cover w-full h-full"
+                    className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-5xl opacity-40">🌸</span>
+                    <span className="text-5xl">🌸</span>
                   </div>
                 )}
+                <div className="absolute top-3 right-3">
+                  <div className="glass rounded-full px-3 py-1 text-[10px] font-black text-brand-900 uppercase">New</div>
+                </div>
               </div>
-              <h3 className="mt-3 text-xl font-bold text-pink-800">{product.name}</h3>
-              <p className="mt-1 text-sm text-pink-600">{product.description}</p>
-              <div className="mt-3 flex items-center justify-between">
-                <p className="text-lg font-bold text-pink-700">₱{Number(product.price).toFixed(2)}</p>
-                <button
-                  onClick={() => addToCart(product.id, 1, "Dedication: ", "Paper wrap (Korean style)")}
-                  className="rounded-full bg-pink-600 px-3 py-1 text-sm font-semibold text-white transition hover:bg-pink-700"
-                >
-                  Add to Cart
-                </button>
+              <div className="mt-5 space-y-2">
+                <h3 className="text-xl font-black text-brand-900">{product.name}</h3>
+                <p className="text-sm text-brand-400 font-medium line-clamp-2">{product.description}</p>
+                <div className="pt-4 flex items-center justify-between border-t border-brand-50">
+                  <p className="text-xl font-black text-brand-900">₱{Number(product.price).toFixed(2)}</p>
+                  <button
+                    onClick={() => addToCart(product.id, 1, "Dedication: ", "Paper wrap (Korean style)")}
+                    className="rounded-xl bg-pink-50 px-4 py-2 text-xs font-black text-pink-600 transition hover:bg-pink-600 hover:text-white"
+                  >
+                    Add to Cart
+                  </button>
+                </div>
               </div>
             </article>
           ))}
         </div>
       </section>
 
-
-
-      <section className="mx-auto mt-10 max-w-7xl px-6 text-center">
-        <p className="text-sm uppercase text-pink-500">Gifting made effortless, by Bloom</p>
-        <p className="mt-2 text-3xl font-bold text-pink-700">Handcrafted bouquets to doorstep delivery</p>
-      </section>
-
-      <section className="mx-auto mt-10 max-w-7xl px-6">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {filteredProducts.slice(0, 4).map((product) => (
-            <div key={product.id} className="rounded-2xl border border-pink-200 bg-white p-4 shadow-sm">
-              <h4 className="text-lg font-bold text-pink-700">{product.name}</h4>
-              <p className="text-sm text-pink-500">Add to Cart</p>
+      {/* Banner Section */}
+      <section className="bg-brand-900 py-20">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="rounded-[3rem] bg-gradient-to-r from-pink-600 to-pink-500 p-12 lg:p-20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
+              <svg className="w-64 h-64" viewBox="0 0 200 200" fill="white">
+                <path d="M100 0L130 70L200 100L130 130L100 200L70 130L0 100L70 70Z" />
+              </svg>
             </div>
-          ))}
+            <div className="relative z-10 max-w-2xl space-y-6">
+              <h2 className="text-4xl lg:text-6xl font-black text-white leading-tight">Need help choosing the perfect gift?</h2>
+              <p className="text-pink-100 text-lg font-medium">Talk to our Smart AI Assistant for personalized recommendations based on your occasion and budget.</p>
+              <button 
+                onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                className="rounded-full bg-white px-10 py-4 text-brand-900 font-black shadow-xl hover:scale-105 transition"
+              >
+                Chat with AI Assistant
+              </button>
+            </div>
+          </div>
         </div>
       </section>
-    </section>
+    </div>
   );
 }
 

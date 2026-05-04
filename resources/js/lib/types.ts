@@ -56,7 +56,7 @@ export type Profile = {
 
 export type Message = {
   id: string;
-  from: "customer" | "admin";
+  from: "customer" | "admin" | "ai";
   text: string;
   createdAt: string;
 };

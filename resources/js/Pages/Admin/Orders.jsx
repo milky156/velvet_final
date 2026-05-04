@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import MapPreview from '@/Components/MapPreview';
 
 const STATUS_COLORS = {
     'Pending': 'bg-pink-100 text-pink-800 border-pink-200',
@@ -175,7 +176,7 @@ export default function AdminOrders({ dbOrders = [] }) {
                                                                 <div className="space-y-1">
                                                                     <p><span className="font-bold text-brand-700">Payment:</span> {order.payment_method}</p>
                                                                     {order.maps_url && (
-                                                                        <a href={order.maps_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-brand-600 font-bold hover:underline">
+                                                                        <a href={order.maps_url.replace('google.com/maps', 'openstreetmap.org')} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-brand-600 font-bold hover:underline">
                                                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">
                                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                                                                                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
@@ -185,6 +186,16 @@ export default function AdminOrders({ dbOrders = [] }) {
                                                                     )}
                                                                 </div>
                                                             </div>
+                                                            {order.delivery_lat && order.delivery_lng && (
+                                                                <div className="mt-4 rounded-xl border border-pink-100 overflow-hidden h-48 relative">
+                                                                    <MapPreview 
+                                                                        lat={order.delivery_lat} 
+                                                                        lng={order.delivery_lng} 
+                                                                        address={order.delivery_address} 
+                                                                        height="100%"
+                                                                    />
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>

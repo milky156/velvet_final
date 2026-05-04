@@ -3,6 +3,7 @@ import { useShop } from "@/context/ShopContext";
 import { Link } from "@inertiajs/react";
 import ShopLayout from "@/Layouts/ShopLayout";
 import BackButton from "@/Components/BackButton";
+import MapPreview from "@/Components/MapPreview";
 
 function tryParseLatLng(input) {
   const s = input.trim();
@@ -51,7 +52,7 @@ export default function CartPage() {
   const { cart, products, removeFromCart, updateCartQty, updateCartItem, placeOrder } = useShop();
   const [showDelivery, setShowDelivery] = useState(false);
   const [deliveryOption, setDeliveryOption] = useState("Standard");
-  const [paymentMethod, setPaymentMethod] = useState("Credit Card");
+  const [paymentMethod, setPaymentMethod] = useState("Cash on Delivery");
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [mapInput, setMapInput] = useState("");
@@ -132,9 +133,9 @@ export default function CartPage() {
             {/* Cart items */}
             {cartDetails.map((entry) => (
               <article key={entry.item.productId} className="rounded-2xl border border-pink-200 bg-white p-4 shadow-sm">
-                <div className="mb-3 grid gap-4 sm:grid-cols-[120px_1fr_1fr]">
+                <div className="mb-3 grid gap-4 sm:grid-cols-[128px_1fr_1fr] items-center">
                   {/* Product image */}
-                  <div className="h-24 w-full overflow-hidden rounded-xl border border-pink-100 bg-pink-50">
+                  <div className="h-32 w-32 overflow-hidden rounded-2xl border border-pink-100 bg-pink-50 shrink-0 mx-auto sm:mx-0">
                     {entry.product?.image ? (
                       <img
                         src={entry.product.image}
@@ -282,7 +283,7 @@ export default function CartPage() {
                   <div className="rounded-2xl border border-pink-200 bg-pink-50 p-4">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                       <div className="min-w-0">
-                        <p className="text-sm font-bold text-pink-700">📍 Delivery Pin (Google Maps)</p>
+                        <p className="text-sm font-bold text-pink-700">📍 Delivery Pin (OpenStreetMap)</p>
                         <p className="mt-1 text-xs text-pink-600">
                           Use GPS for auto-fill, or paste a Google Maps link.
                         </p>
@@ -341,23 +342,19 @@ export default function CartPage() {
                           {deliveryLatLng && (
                             <a
                               className="text-xs font-semibold text-pink-700 underline"
-                              href={`https://www.google.com/maps/search/?api=1&query=${deliveryLatLng.lat},${deliveryLatLng.lng}`}
+                              href={`https://www.openstreetmap.org/?mlat=${deliveryLatLng.lat}&mlon=${deliveryLatLng.lng}#map=16/${deliveryLatLng.lat}/${deliveryLatLng.lng}`}
                               target="_blank"
                               rel="noreferrer"
                             >
-                              Open in Google Maps
+                              Open in OpenStreetMap
                             </a>
                           )}
                         </div>
                         <div className="mt-2 overflow-hidden rounded-2xl border border-pink-200 bg-white">
-                          <iframe
-                            title="Delivery location preview"
-                            className="h-[260px] w-full"
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                            src={`https://www.google.com/maps?q=${encodeURIComponent(
-                              deliveryLatLng ? `${deliveryLatLng.lat},${deliveryLatLng.lng}` : deliveryAddress || "Philippines",
-                            )}&output=embed`}
+                          <MapPreview 
+                            lat={deliveryLatLng?.lat} 
+                            lng={deliveryLatLng?.lng} 
+                            address={deliveryAddress} 
                           />
                         </div>
                         <p className="mt-2 text-xs text-pink-600">
@@ -388,11 +385,10 @@ export default function CartPage() {
                       <select
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="mt-1 w-full rounded-xl border border-pink-300 px-4 py-2.5 text-sm"
+                        className="mt-1 w-full rounded-xl border border-pink-300 px-4 py-2.5 text-sm bg-gray-50 cursor-not-allowed"
+                        disabled
                       >
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="PayPal">PayPal</option>
-                        <option value="Cash on Delivery">Cash on Delivery</option>
+                        <option value="Cash on Delivery">Cash on Delivery (COD)</option>
                       </select>
                     </label>
                   </div>

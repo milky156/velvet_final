@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Head, router, usePage } from "@inertiajs/react";
 import RiderLayout from "@/Layouts/RiderLayout";
+import MapPreview from "@/Components/MapPreview";
 
 const STATUS_COLORS = {
     'Pending': 'bg-pink-100 text-pink-800 border-pink-200',
@@ -158,12 +159,12 @@ export default function RiderDashboard({ dbOrders = [] }) {
 
                           <div className="flex flex-col justify-between gap-4">
                               <div className="rounded-2xl border border-brand-200 overflow-hidden h-48 sm:h-full relative shadow-inner bg-gray-100">
-                                  <iframe
-                                      title={`Map for ${order.id}`}
-                                      className="absolute inset-0 w-full h-full"
-                                      loading="lazy"
-                                      src={`https://www.google.com/maps?q=${encodeURIComponent(order.delivery_address)}&output=embed`}
-                                  />
+                                 <MapPreview 
+                                   lat={order.delivery_lat} 
+                                   lng={order.delivery_lng} 
+                                   address={order.delivery_address} 
+                                   height="100%"
+                                 />
                               </div>
 
                               <div className="flex gap-3">

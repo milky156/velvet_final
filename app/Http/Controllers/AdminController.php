@@ -16,7 +16,7 @@ class AdminController extends Controller
 
     public function index()
     {
-        $orders     = Order::with('items')->orderByDesc('created_at')->get();
+        $orders     = Order::with('items.product')->orderByDesc('created_at')->get();
         $products   = Product::with('categories')->get();
         $users      = User::orderByDesc('created_at')->get();
         $categories = Category::withCount('products')->get();
